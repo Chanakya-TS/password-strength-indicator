@@ -436,10 +436,28 @@ function applyMask() {
   const dictionary = scoreDictionaryResistance(realValue);
   const pattern = scorePatternPredictability(realValue);
   const composition = scoreCompositionDiversity(realValue);
-  const totalScore =
+  
+  let totalScore =
     realValue.length === 0
       ? 0
       : Math.round(((entropy.score + dictionary.score + pattern.score + composition.score) / 90) * 100);
+
+  // Critical Capping: Ensure a single failure point limits the final score
+  if (realValue.length > 0) {
+    // 1. Breach Cap: Known leaked passwords are fundamentally unsafe.
+    if (dictionary.status === "Exact match in breach list.") {
+      totalScore = Math.min(totalScore, 10);
+    } 
+    // 2. Dictionary Cap: Significant reliance on dictionary words or patterns.
+    else if (dictionary.score <= 15) {
+      totalScore = Math.min(totalScore, 30);
+    }
+
+    // 3. Entropy Cap: Low mathematical complexity.
+    if (entropy.score < 15) {
+      totalScore = Math.min(totalScore, 25);
+    }
+  }
 
   meterFill.style.width = `${totalScore}%`;
   meterTrack.setAttribute("aria-valuenow", `${totalScore}`);
