@@ -453,8 +453,10 @@ function applyMask() {
       totalScore = Math.min(totalScore, 30);
     }
 
-    // 3. Entropy Cap: Low mathematical complexity.
-    if (entropy.score < 15) {
+    // 3. Entropy Caps: Low mathematical complexity.
+    if (entropy.score < 8) {
+      totalScore = Math.min(totalScore, 10);
+    } else if (entropy.score < 15) {
       totalScore = Math.min(totalScore, 25);
     }
   }
